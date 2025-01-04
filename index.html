@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MineSweeper Game</title>
+    <style>
+        /* Body styles */
+        body {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Grid container styles */
+        #container {
+            height: 300px;
+            width: 400px;
+            margin: 10px;
+            display: grid;
+        }
+
+        /* Box styles */
+        .box {
+            background-color: blue;
+            margin: 3px;
+            text-align: center;
+            border: 1px solid black;
+        }
+
+        /* Selection box styles */
+        #selection {
+            position: absolute;
+            left: 250px;
+            top: 100px;
+            display: flex;
+            flex-direction: column;
+            height: 200px;
+            width: 200px;
+            background-color: aquamarine;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid black;
+            border-radius: 5px;
+        }
+
+        /* Dropdown styles */
+        .style {
+            margin: 10px;
+            height: 25px;
+            width: 150px;
+        }
+
+        /* Restart button styles */
+        #restart {
+            margin: 10px;
+            position: absolute;
+            left: 670px;
+            bottom: 25px;
+            height: 50px;
+            width: 150px;
+            font-size: 30px;
+            background-color: lightseagreen;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container for grid -->
+    <div id="container"></div>
+
+    <!-- Selection options -->
+    <div id="selection">
+        <!-- Grid size selection -->
+        <select name="grid" id="grid" class="style">
+            <option value="0">Select the Grid</option>
+            <option value="3">3 X 3</option>
+            <option value="5">5 X 5</option>
+            <option value="8">8 X 8</option>
+        </select>
+
+        <!-- Mines selection -->
+        <select name="" id="mines" class="style">
+            <option value="0">Select the Mines</option>
+        </select>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const grid = document.getElementById('grid');
+        let x = -1;
+
+        function g(event) {
+            x = Number(event.target.value); // Update grid size based on selection
+            console.log(x);
+            if (x !== -1) {
+                Mines(x);
+            }
+        }
+        let M = document.getElementById('mines');
+        grid.addEventListener('change', g);
+        let m = -1;
+
+        function Mines(x) {
+            M.innerHTML = '<option value="0">Select the Mines</option>';
+            for (let i = 1; i < x * x; i++) {
+                let option = document.createElement('option');
+                option.innerHTML = `${i}`;
+                M.appendChild(option);
+            }
+
+            M.addEventListener('change', (event) => {
+                m = event.target.value;
+                console.log(m);
+                if (m != -1) {
+                    generateGrid(x);
+                }
+            });
+        }
+
+        function generateGrid(x) {
+            container.innerHTML = '';
+            container.style.width = x === 3 ? '400px' : '500px';
+            container.style.height = x === 3 ? '400px' : '500px';
+            container.style.display = 'grid';
+            container.style.gridTemplateColumns = `repeat(${x}, 1fr)`;
+            container.style.gridTemplateRows = `repeat(${x}, 1fr)`;
+
+            let ID = 0;
+            for (let i = 1; i <= x; i++) {
+                for (let j = 1; j <= x; j++) {
+                    let div = document.createElement('div');
+                    div.className = 'box';
+                    div.id = `${ID}`;
+                    ID++;
+                    container.appendChild(div);
+                }
+            }
+
+            let restart = document.createElement('button');
+            restart.id = 'restart';
+            restart.innerHTML = 'Restart';
+            container.appendChild(restart);
+            restart.addEventListener('click', () => {
+                container.innerHTML = '';
+                return;
+            });
+
+            let arr = new Array(x * x).fill(0);
+            for (let i = 1; i <= m;) {
+                let idx = Math.floor(Math.random() * x * x);
+                if (arr[idx] == 0) {
+                    arr[idx] = 1;
+                    i++;
+                }
+            }
+
+            function Selection(event) {
+                let selected = event.target.id;
+                let font = new Map([[`3`, '140px'], [`5`, '55px'], [`8`, '55px']]);
+
+                if (arr[selected] == 0) {
+                    event.target.innerHTML = '✔';
+                    event.target.style.fontSize = font.get(`${x}`);
+                    event.target.style.textAlign = 'center';
+                    event.target.style.backgroundColor = 'white';
+                } else {
+                    event.target.style.backgroundColor = 'white';
+                    event.target.innerHTML = 'X';
+                    event.target.style.fontSize = font.get(`${x}`);
+                    event.target.style.textAlign = 'center';
+                    container.removeEventListener('click', Selection);
+                    return;
+                }
+            }
+
+            container.addEventListener('click', Selection);
+        }
+    </script>
+</body>
+</html>
